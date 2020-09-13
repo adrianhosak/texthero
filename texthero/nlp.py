@@ -215,3 +215,58 @@ def pos_tag(s: TextSeries) -> pd.Series:
         )
 
     return pd.Series(pos_tags, index=s.index)
+
+
+@InputSeries(TextSeries)
+def lemmatize(s: TextSeries, keep_pron=False) -> pd.Series:
+    """
+    Lemmatize each word in the Series.
+    Return a Pandas Series where each word is replaced by its lemma.
+    Punctuation will be seperated from words with a white space.
+    A lemma is the base form of a word with no inflectional suffixes.
+    Lemmatization is very similar to stemming. 
+    You can read about it here:
+    <https://en.m.wikipedia.org/wiki/Lemmatisation>
+
+    Parameters
+    ----------
+    s : :class:`texthero._types.TextSeries`
+
+    keep_pron : bool
+        Pronouns can not be lemmatized. 
+        If this parameter is set True pronouns will stay unchanged.
+        Otherwise they will be replaced by "-PRON-".
+
+    Examples
+    --------
+    >>> import texthero as hero
+    >>> import pandas as pd
+    >>> s = pd.Series(["The best puppy is eating his food."])
+    >>> lemmatize(s)
+    0    the good puppy be eat -PRON- food .
+    dtype: object
+
+    >>> lemmatize(s, keep_pron = True)
+    0    the good puppy be eat his food .
+    dtype: object
+    """
+
+    lemmatized_docs = []
+
+    nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
+
+    if keep_pron:
+        for doc in nlp.pipe(s.values, batch_size=32):
+            lemmatized_docs.append(
+                " ".join(
+                    [
+                        word.lemma_ if word.lemma_ != "-PRON-" else word.lower_
+                        for word in doc
+                    ]
+                )
+            )
+    else:
+        for doc in nlp.pipe(s.values, batch_size=32):
+            lemmatized_docs.append(" ".join([word.lemma_ for word in doc]))
+
+    return pd.Series(lemmatized_docs, index=s.index)

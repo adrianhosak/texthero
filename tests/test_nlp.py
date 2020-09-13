@@ -98,3 +98,17 @@ class TestNLP(PandasTestCase):
         )
 
         self.assertEquals(pos_tagging, s_true)
+
+    """
+    Lemmatize.
+    """
+
+    def test_keep_pronouns_false(self):
+        s = pd.Series(["The best puppy is eating his food."])
+        s_true = pd.Series(["the good puppy be eat -PRON- food ."])
+        self.assertEqual(nlp.lemmatize(s), s_true)
+
+    def test_keep_pronouns_true(self):
+        s = pd.Series(["The best puppy is eating his food."])
+        s_true = pd.Series(["the good puppy be eat his food ."])
+        self.assertEqual(nlp.lemmatize(s, keep_pron=True), s_true)
