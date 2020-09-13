@@ -26,6 +26,7 @@ s_numeric_lists = pd.Series([[5.0, 5.0], [6.0, 6.0]], index=[5, 6])
 test_cases_nlp = [
     ["named_entities", nlp.named_entities, (s_text,)],
     ["noun_chunks", nlp.noun_chunks, (s_text,)],
+    ["lemmatize", nlp.lemmatize, (s_text,)]
 ]
 
 test_cases_preprocessing = [
